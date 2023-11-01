@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -46,8 +47,8 @@ public class SensorServiceImpl implements SensorService {
     public double sensorsDistance(Sensor sensor1, Sensor sensor2) {
 
         int radius = 6371;
-        float dlon = sensor2.getLongitude() - sensor1.getLongitude();
-        float dlat = sensor2.getLatitude() - sensor1.getLatitude();
+        double dlon = sensor2.getLongitude() - sensor1.getLongitude();
+        double dlat = sensor2.getLatitude() - sensor1.getLatitude();
         double a = Math.pow(Math.sin(dlat/2), 2) + Math.cos(sensor1.getLatitude()) * Math.cos(sensor2.getLatitude()) * Math.pow(Math.sin(dlon/2), 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
@@ -66,12 +67,12 @@ public class SensorServiceImpl implements SensorService {
             double distance;
             for (Sensor sensor : sensors) {
                 distance = sensorsDistance(mainSensor.get(), sensor);
-                if(distance < minDistance) {
+                if(distance < minDistance && !Objects.equals(sensor.getId(), mainSensor.get().getId())) {
                     minDistance = distance;
                     nn = sensor;
                 }
             }
-            return modelMapper.map(nn, SensorResponseDTO.class);
+            if(nn != null) return modelMapper.map(nn, SensorResponseDTO.class);
         }
         return null;
     }

@@ -15,13 +15,13 @@ public class SensorResponseDTO {
     @NotNull
     private long id;
 
-    private float latitude;
+    private double latitude;
 
-    private float longitude;
+    private double longitude;
 
     private String ip;
 
-    private long port;
+    private double port;
 
 }
 

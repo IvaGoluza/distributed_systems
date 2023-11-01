@@ -9,7 +9,7 @@ public interface ReadingService {
 
     ReadingResponseDTO getReading(Long id);
 
-    ReadingResponseDTO saveReading(ReadingDTO readingDTO);
+    ReadingResponseDTO saveReading(Long id, ReadingDTO readingDTO);
 
     List<ReadingResponseDTO> getAllReadings(Long id);
 }

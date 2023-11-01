@@ -26,9 +26,9 @@ public class ReadingController {
     }
 
   // 4.3  Spremanje očitanja pojedinog senzora
-    @PostMapping()
-    public ResponseEntity<String> saveReading(ReadingDTO readingDTO) {
-        ReadingResponseDTO reading = readingService.saveReading(readingDTO);
+    @PostMapping("/{id}")
+    public ResponseEntity<String> saveReading(@PathVariable("id") Long id, @RequestBody ReadingDTO readingDTO) {
+        ReadingResponseDTO reading = readingService.saveReading(id, readingDTO);
         if(reading != null) return ResponseEntity.created(linkTo(methodOn(this.getClass()).getReading(reading.getId())).toUri()).build();
         else return ResponseEntity.noContent().build();
     }

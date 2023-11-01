@@ -34,10 +34,11 @@ public class ReadingServiceImpl implements ReadingService {
     }
 
     @Override
-    public ReadingResponseDTO saveReading(ReadingDTO readingDTO) {
-        Optional<Sensor> sensor = sensorRepository.findById(readingDTO.getSensorId());
+    public ReadingResponseDTO saveReading(Long id, ReadingDTO readingDTO) {
+        Optional<Sensor> sensor = sensorRepository.findById(id);
         if(sensor.isPresent()) {
             Reading reading = modelMapper.map(readingDTO, Reading.class);
+            reading.setSensor(sensor.get());
             reading = readingRepository.save(reading);
             return modelMapper.map(reading, ReadingResponseDTO.class);
         } else return null;

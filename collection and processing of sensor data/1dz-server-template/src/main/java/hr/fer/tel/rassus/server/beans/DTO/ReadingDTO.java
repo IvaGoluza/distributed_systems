@@ -11,17 +11,16 @@ import lombok.Setter;
 @Setter
 public class ReadingDTO {
 
-    private float temperature;
+    private double temperature;
 
-    private float pressure;
+    private double pressure;
 
-    private float humidity;
+    private double humidity;
 
-    private float co;
+    private double co;
 
-    private float no2;
+    private double no2;
 
-    private float so2;
+    private double so2;
 
-    private Long sensorId;
 }
