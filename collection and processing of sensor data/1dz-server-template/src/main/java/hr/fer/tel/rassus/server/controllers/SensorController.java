@@ -25,20 +25,20 @@ public class SensorController {
         return ResponseEntity.ok(sensorService.getSensor(id));
     }
 
-    //  TODO 4.1  Registracija
+    //  4.1  Registracija
     @PostMapping()
     public ResponseEntity<String> sensorRegister(@RequestBody SensorDTO sensorDTO) {
         SensorResponseDTO sensor = sensorService.sensorRegister(sensorDTO);
         return ResponseEntity.created(linkTo(methodOn(this.getClass()).getSensor(sensor.getId())).toUri()).build();
     }
 
-    //  TODO 4.4  Popis senzora
+    //  4.4  Popis senzora
     @GetMapping()
     public ResponseEntity<List<SensorResponseDTO>> getSensors() {
         return ResponseEntity.ok(sensorService.getSensors());
     }
 
-    //  TODO 4.2  Najbliži susjed
+    //  4.2  Najbliži susjed
     @GetMapping("/nn/{id}")
     public ResponseEntity<SensorResponseDTO> getNearestNeighbour(@PathVariable("id") Long id) {
         return ResponseEntity.ok(sensorService.getNearestNeighbour(id));

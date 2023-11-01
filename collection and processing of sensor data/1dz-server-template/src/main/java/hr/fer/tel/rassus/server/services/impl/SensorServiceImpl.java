@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 @Service
 public class SensorServiceImpl implements SensorService {
 
-    private SensorRepository sensorRepository;
+    private final SensorRepository sensorRepository;
 
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Override
     public SensorResponseDTO getSensor(Long id) {
