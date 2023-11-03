@@ -41,6 +41,8 @@ public class SensorController {
     //  4.2  Najbliži susjed
     @GetMapping("/nn/{id}")
     public ResponseEntity<SensorResponseDTO> getNearestNeighbour(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(sensorService.getNearestNeighbour(id));
+        SensorResponseDTO sensorResponseDTO = sensorService.getNearestNeighbour(id);
+        if (sensorResponseDTO != null) return ResponseEntity.ok(sensorResponseDTO);
+        else return ResponseEntity.noContent().build();
     }
 }

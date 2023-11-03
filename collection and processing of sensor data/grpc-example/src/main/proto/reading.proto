@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "hr.fer.tel.rassus.sensorsReadings";
+
+service Reading {
+  // sends a reading
+  rpc RequestReading (Empty) returns (ReadingMsg);
+}
+
+// The response message containing the reading
+message ReadingMsg {
+  double temperature = 1;
+  double pressure = 2;
+  double humidity = 3;
+  double co = 4;
+  double no2 = 5;
+  double so2 = 6;
+}
+
+// The request message
+message Empty {
+
+}
