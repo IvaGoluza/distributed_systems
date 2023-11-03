@@ -7,10 +7,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.logging.Logger;
 
 public class HttpClient implements httpInterface {
 
+    private static final Logger logger = Logger.getLogger(HttpClient.class.getName());
     private final SensorApi sensorApi;
     private final ReadingApi readingApi;
 
@@ -41,6 +42,7 @@ public class HttpClient implements httpInterface {
         try {
             Response<Void> response = readingApi.saveReading(sensorId, reading).execute();
             String location = response.headers().get("Location");
+            logger.info("Reading has been saved in database.");
             return Integer.parseInt(location.substring(location.lastIndexOf('/')+1));
         } catch (IOException e) {
             throw new RuntimeException(e);

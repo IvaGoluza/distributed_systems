@@ -20,6 +20,7 @@ public class RPCclient {
         this.channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         this.readingBlockingStub = ReadingGrpc.newBlockingStub(channel);
         this.isRPCclientActive = true;
+        logger.info("Open channel for gRPC communication between sensors. gRPC client started for gRPC server on port " + port);
     }
 
     public void stop() throws InterruptedException {
@@ -40,7 +41,7 @@ public class RPCclient {
             logger.info("Received readings from nearest sensor neighbour:\n[Temperature]: " + response.getTemperature() + "\n[Pressure]: " + response.getPressure() + "\n[Humidity]: " + response.getHumidity() + "\n[CO]: " + response.getCo() + "\n[NO2]: " + response.getNo2() + "\n[SO2]: " + response.getSo2());
             return new Reading(response.getTemperature(), response.getPressure(), response.getHumidity(), response.getCo(), response.getNo2(), response.getSo2());
         } catch (StatusRuntimeException e) {
-            logger.info("[RPC failed] " + e.getMessage());
+            logger.info("[RPC failed - neighbour sensor is no longer running] " + e.getMessage());
             return null;
         }
     }

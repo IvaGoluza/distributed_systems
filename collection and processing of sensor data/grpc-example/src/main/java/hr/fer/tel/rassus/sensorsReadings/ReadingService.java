@@ -31,7 +31,7 @@ public class ReadingService extends ReadingGrpc.ReadingImplBase{
         responseObserver.onNext(
                 response
         );
-        logger.info("Nearest neighbour sensor sending it's readings:\n[Temperature]: " + response.getTemperature() + "\n[Pressure]: " + response.getPressure() + "\n[Humidity]: " + response.getHumidity() + "\n[CO]: " + response.getCo() + "\n[NO2]: " + response.getNo2() + "\n[SO2]: " + response.getSo2());
+        logger.info("Sending my current readings to the neighbour sensor:\n[Temperature]: " + response.getTemperature() + "\n[Pressure]: " + response.getPressure() + "\n[Humidity]: " + response.getHumidity() + "\n[CO]: " + response.getCo() + "\n[NO2]: " + response.getNo2() + "\n[SO2]: " + response.getSo2());
         // Send a notification of successful stream completion.
         responseObserver.onCompleted();
 

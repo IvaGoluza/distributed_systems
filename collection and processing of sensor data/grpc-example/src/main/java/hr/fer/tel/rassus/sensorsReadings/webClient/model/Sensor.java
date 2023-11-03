@@ -61,11 +61,11 @@ public class Sensor {
 
     @Override
     public String toString() {
-        return "Sensor{" +
+        return "SENSOR[" +
                 "latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", ip='" + ip + '\'' +
                 ", port=" + port +
-                '}';
+                ']';
     }
 }

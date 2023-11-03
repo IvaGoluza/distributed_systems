@@ -34,13 +34,13 @@ public class RPCserver {
 
         //  Clean shutdown of server in case of JVM shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.err.println("[JVM is shutting down] => [Shutting down gRPC server]");
+            System.err.println("[JVM is shutting down] => [Shutting down gRPC server on port "+ port + "]");
             try {
                 RPCserver.this.stop();
             } catch (InterruptedException e) {
                 e.printStackTrace(System.err);
             }
-            System.err.println("[Server shut down]");
+            System.err.println("[gRPC server -- port: " + port + " shut down]");
         }));
     }
 

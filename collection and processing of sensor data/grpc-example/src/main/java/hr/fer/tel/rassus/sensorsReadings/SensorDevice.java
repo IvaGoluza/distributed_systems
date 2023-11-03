@@ -12,8 +12,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 public class SensorDevice {
+
+    private static final Logger logger = Logger.getLogger(SensorDevice.class.getName());
 
     private final RPCserver rpcServer;
 
@@ -60,9 +63,9 @@ public class SensorDevice {
         return List.of(latitude, longitude);
     }
 
-    public static Reading generateReading(long activeSeconds, List<CSVRecord> sensorReadings) {
-        int row = (int) ((activeSeconds % 100) + 1);
-        if (row <= sensorReadings.size()) {
+    public static Reading generateReading(long activeMiliSeconds, List<CSVRecord> sensorReadings) {
+        int row = (int) (((activeMiliSeconds / 1000) % 100) + 1);
+        if (row < sensorReadings.size()) {
             CSVRecord currentSensorReading = sensorReadings.get(row);
             return new Reading(currentSensorReading.get("Temperature").isEmpty() ? 0.0 : Double.parseDouble(currentSensorReading.get("Temperature")),
                     currentSensorReading.get("Pressure").isEmpty() ? 0.0 : Double.parseDouble(currentSensorReading.get("Pressure")),
@@ -90,7 +93,7 @@ public class SensorDevice {
         else calibrated.setCo((current.getCo() + neighbour.getCo())/2);
 
         if(current.getNo2() == 0.0 || neighbour.getNo2() == 0.0) calibrated.setNo2(current.getNo2() + neighbour.getNo2());
-        calibrated.setNo2((current.getNo2() + neighbour.getNo2())/2);
+        else calibrated.setNo2((current.getNo2() + neighbour.getNo2())/2);
 
         if(current.getSo2() == 0.0 || neighbour.getSo2() == 0.0) calibrated.setSo2(current.getSo2() + neighbour.getSo2());
         else calibrated.setSo2((current.getSo2() + neighbour.getSo2())/2);
@@ -110,6 +113,7 @@ public class SensorDevice {
         while(isOccupied(port)) {
             port++;
         }
+        logger.info("Non-occupied port for this sensor: " + port);
         // 2. create sensor device: rcp server, rcp client and web client
         SensorDevice sensorDevice = new SensorDevice(port);
 
@@ -118,36 +122,54 @@ public class SensorDevice {
 
         // 4. get sensor's geocoordinates and register sensor (using web server)
         List<Double> geoCoordinates = getGeoCoordinates();
-        Integer sensorId = sensorDevice.httpClient.newSensor(new Sensor(geoCoordinates.get(0), geoCoordinates.get(1), "127.0.0.1", (long) port));
+        Sensor sensorForReg = new Sensor(geoCoordinates.get(0), geoCoordinates.get(1), "127.0.0.1", (long) port);
+        Integer sensorId = sensorDevice.httpClient.newSensor(sensorForReg);
         if(sensorId == null) {                // if for some reason sensor has not been saved on web server
             sensorDevice.rpcServer.stop();
             return;
         }
+        logger.info("Sensor registered on web server. SensorID: " + sensorId + "\n" + sensorForReg);
 
-        // 5. get nearest neighbour sensor from web server and init rcp client for nearest sensor rcp server
+        // 5. get nearest neighbour sensor from web server and init rcp client for nearest sensor rcp server if there is a neighbour
         Sensor nearestSensor = sensorDevice.httpClient.getNearestSensor(Long.valueOf(sensorId));
         boolean hasNeighbour = nearestSensor != null;
-        if(hasNeighbour) sensorDevice.rpcClient = new RPCclient(nearestSensor.getIp(), nearestSensor.getPort().intValue());
+        if(hasNeighbour) {
+            logger.info("Sensor " + sensorId + " has the nearest neighbour sensor available: " + nearestSensor + "\nOpening rpc channel with this neighbour sensor.");
+            sensorDevice.rpcClient = new RPCclient(nearestSensor.getIp(), nearestSensor.getPort().intValue());
+        } else logger.info("There is no active sensor in the nearby - there will not be any calibration.");
 
-        while(sensorDevice.rpcServer.isRPCserverActive() && (sensorDevice.rpcClient != null && hasNeighbour == sensorDevice.rpcClient.isRPCclientActive())) {
+        while(sensorDevice.rpcServer.isRPCserverActive()
+                && (hasNeighbour == (sensorDevice.rpcClient != null && sensorDevice.rpcClient.isRPCclientActive()))) {
+
             // 6. make current sensor reading (from the file based on time of client activity)
             Reading currentSensorReading = generateReading(System.currentTimeMillis() - startTime, sensorReadings);
+            logger.info("Sensor has it's current readings: " + currentSensorReading);
 
             // 7. get readings from nearest neighbour sensor using rcp
             Reading neighbourReadings = null;
             if(hasNeighbour) {
                 Empty requestReading = Empty.newBuilder().build();
-                neighbourReadings = sensorDevice.rpcClient.requestReading(requestReading);
+                try {
+                    neighbourReadings = sensorDevice.rpcClient.requestReading(requestReading);
+                    if(neighbourReadings != null) logger.info("Got current readings from the neighbour sensor: " + neighbourReadings);
+                    else logger.info("[Neighbour sensor rcp server not running] Readings data will be saved without calibration.");
+                } catch (Exception e) {
+                    logger.info(e.getMessage());
+                }
             }
 
             // 8. calibrate current sensor readings with neighbour sensor readings
             Reading calibratedReadings = calibrate(currentSensorReading, neighbourReadings);
+            logger.info(neighbourReadings != null ? "Calibrated readings: " + calibratedReadings : "Readings (no calibration): " + calibratedReadings);
 
             // 9. save calibrated readings in database using web server
             Integer readingId = sensorDevice.httpClient.newReading(Long.valueOf(sensorId), calibratedReadings);
+
             Thread.sleep(10000);
         }
 
+        assert sensorDevice.rpcClient != null;
+        sensorDevice.rpcClient.stop();                // shutdown in which preexisting calls continue but new calls are cancelled
         sensorDevice.rpcServer.blockUntilShutdown();  // wait for the rcp server to shut down
 
     }

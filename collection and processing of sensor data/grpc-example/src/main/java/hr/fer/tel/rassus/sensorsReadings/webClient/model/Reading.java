@@ -65,13 +65,13 @@ public class Reading {
 
     @Override
     public String toString() {
-        return "Reading{" +
+        return "READINGS[" +
                 "temperature=" + temperature +
                 ", pressure=" + pressure +
                 ", humidity=" + humidity +
                 ", co=" + co +
                 ", no2=" + no2 +
                 ", so2=" + so2 +
-                '}';
+                ']';
     }
 }
