@@ -141,6 +141,15 @@ public class SensorDevice {
         while(sensorDevice.rpcServer.isRPCserverActive()
                 && (hasNeighbour == (sensorDevice.rpcClient != null && sensorDevice.rpcClient.isRPCclientActive()))) {
 
+            if(!hasNeighbour) {        // don't deprive the poor first sensor -> waiting for another sensor to become active
+                nearestSensor = sensorDevice.httpClient.getNearestSensor(Long.valueOf(sensorId));
+                hasNeighbour = nearestSensor != null;
+                if(hasNeighbour) {
+                    logger.info("Sensor " + sensorId + " has the nearest neighbour sensor available: " + nearestSensor + "\nOpening rpc channel with this neighbour sensor.");
+                    sensorDevice.rpcClient = new RPCclient(nearestSensor.getIp(), nearestSensor.getPort().intValue());
+                }
+            }
+
             // 6. make current sensor reading (from the file based on time of client activity)
             Reading currentSensorReading = generateReading(System.currentTimeMillis() - startTime, sensorReadings);
             logger.info("Sensor has it's current readings: " + currentSensorReading);
