@@ -9,8 +9,8 @@ The server manages data about available registered sensors, theirs
 geographical position and calibrated readings. All sensors communicate with server that offers web services.
 
 ## How the simulation works
-a) We have one main server that provides web services to all of the running sensors -> this is implemented as a Spring Boot project
-Navigate to the 'server' directory and run commands:
+a) There is one main server that provides web services to all of the running sensors -> this is implemented as a Spring Boot project. 
+ Navigate to the 'server' directory and run commands:
 ```bash
 gradlew build
 java -jar build\libs\server-0.0.1-SNAPSHOT.jar
@@ -21,5 +21,4 @@ Based of how many sensors you want to have in your simulation, in multiple termi
 gradlew build
 java -cp build\libs\grpc-example-1.jar hr.fer.tel.rassus.sensorsReadings.SensorDevice
   ```
-Now you can keep track of all of the sensors operations by logs.
-h2 database in browser: http://localhost:8090/h2-console
+Now you can keep track of all of the sensors operations by logs. H2 database in browser: http://localhost:8090/h2-console
